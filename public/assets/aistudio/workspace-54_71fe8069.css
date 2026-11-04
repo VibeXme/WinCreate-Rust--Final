@@ -1,0 +1,187 @@
+/* WinCreate 5.4: dedicated Windows animation page and Dynamic Island Fullscreen */
+#wcDILStart,#wcStartAnimation{white-space:nowrap;border:1px solid #70554c;background:#333036;color:#f4c5aa;font-size:11px;padding:9px 12px;border-radius:8px;cursor:pointer}
+#wcDILStart:hover,#wcStartAnimation:hover{background:#4b3b35}
+#wcDilRoot{display:none}
+body.studio-v5.wc-dil-fullscreen #wcDilRoot{display:block;position:fixed;inset:0;pointer-events:none;z-index:2200;color:#fff;font-family:Inter,ui-sans-serif,system-ui}
+body.studio-v5.wc-dil-fullscreen #studioShell,
+body.studio-v5.wc-dil-fullscreen #wcArtistControls,
+body.studio-v5.wc-dil-fullscreen #topLeftBar,
+body.studio-v5.wc-dil-fullscreen #topRightBar,
+body.studio-v5.wc-dil-fullscreen #leftDock,
+body.studio-v5.wc-dil-fullscreen #quickShapeToolbar{display:none!important}
+body.studio-v5.wc-dil-fullscreen #pageStudio{overflow:hidden!important}
+body.studio-v5.wc-dil-fullscreen #pageStudio #viewport{
+ position:fixed!important;inset:0!important;top:0!important;bottom:0!important;left:0!important;right:0!important;width:100vw!important;height:100dvh!important;
+}
+body.studio-v5.wc-dil-fullscreen .canvas-board{box-shadow:0 12px 45px #0008!important}
+#wcDilDock{position:absolute;pointer-events:auto;left:50%;bottom:14px;transform:translateX(-50%);max-width:calc(100vw - 22px);display:flex;align-items:center;justify-content:center;gap:5px;z-index:2600;padding:7px;background:#181b23e8;border:1px solid #ffffff25;border-radius:999px;backdrop-filter:blur(24px);box-shadow:0 14px 48px #0009}
+#wcDilDock button{background:transparent;color:#ece4e2;padding:8px 12px;border:0;border-radius:999px;font-size:11px;cursor:pointer;white-space:nowrap}
+#wcDilDock button:hover,#wcDilDock button:focus-visible{background:#edaa8d28;color:#fff}
+#wcDilDock #wcDilExit{background:#e4a486;color:#211c1c;font-weight:700}
+.wc-dil-divider{width:1px;height:21px;background:#ffffff30}
+.wc-dil-island{position:fixed;width:294px;min-width:180px;max-width:calc(100vw - 14px);min-height:52px;max-height:calc(100dvh - 88px);resize:both;overflow:hidden;pointer-events:auto;background:#20232cfa;border:1px solid #ffffff25;border-radius:18px;box-shadow:0 20px 65px #000a,inset 0 1px #ffffff15;backdrop-filter:blur(24px);display:flex;flex-direction:column;transition:box-shadow .16s ease}
+.wc-dil-island:hover{box-shadow:0 25px 80px #000b,inset 0 1px #ffffff1e}
+.wc-dil-island[hidden]{display:none!important}
+.wc-dil-island.minimized{height:48px!important;min-height:48px;resize:none}
+.wc-dil-island.minimized .wc-dil-island-body{display:none!important}
+.wc-dil-island-head{height:46px;min-height:46px;display:flex;align-items:center;gap:6px;padding:6px 10px;border-bottom:1px solid #ffffff17;background:linear-gradient(120deg,#43332d77,#292d3966)}
+.wc-dil-drag{cursor:grab;touch-action:none;user-select:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:750;letter-spacing:.3px}
+.wc-dil-drag:active{cursor:grabbing}
+.wc-dil-island-head button{border:1px solid #ffffff20;background:#2c2d38;color:#ded6db;border-radius:8px;width:27px;height:27px;flex-shrink:0;cursor:pointer}
+.wc-dil-island-head button:hover{background:#5e4440}
+.wc-dil-island-body{flex:1;min-height:0;overflow:auto;padding:11px;scrollbar-width:thin;overscroll-behavior:contain}
+.wc-dil-island-body button{cursor:pointer}
+.wc-dil-island-body .studio-pane{display:block!important}
+#wcDilTools{display:block!important}
+#wcDilTools #studioToolButtons,#wcDilTools #studioMoreTools{display:flex!important;flex-flow:row wrap!important;gap:7px!important;position:static!important;inset:auto!important;width:100%!important;max-height:none!important;background:none!important;transform:none!important;border:0!important;box-shadow:none!important;padding:5px!important}
+#wcDilTools #studioToolButtons button,#wcDilTools #studioMoreTools button{display:flex!important;align-items:center;justify-content:center;min-width:39px!important;width:44px!important;height:42px!important;border-radius:10px!important;background:#30333eff!important;border:1px solid #ffffff20!important;padding:8px!important;color:#e9e4e0!important;position:static!important;transform:none!important}
+#wcDilTools #studioToolButtons button.active{background:#805441!important;color:#fff!important}
+#wcDilTools button svg{width:19px;height:19px}
+#wcDilStroke #studioProperties{display:block!important;padding:0!important;overflow:visible!important;height:auto!important}
+#wcDilStroke .inspector-section{padding:8px 4px!important}
+#wcDilStroke .studio-feature-link,#wcDilStroke .studio-note{display:none!important}
+#wcDilColor #colorPopover{position:static!important;inset:auto!important;display:flex!important;visibility:visible!important;opacity:1!important;width:100%!important;max-width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;transform:none!important;box-shadow:none!important;border:none!important;background:none!important;backdrop-filter:none!important;animation:none!important;pointer-events:auto!important}
+#wcDilColor #colorPopover .pop-close-btn{display:none!important}
+#wcDilColor #colorWheelCanvas{max-width:100%;align-self:center}
+#wcDilLayers #studioLayerPane{display:block!important;overflow:visible!important;max-height:none!important;height:auto!important}
+#wcDilLayers #layersPopover.docked{display:flex!important}
+#wcDilLayers #layerList{max-height:none!important}
+#wcDilCreate{display:grid;grid-template-columns:1fr 1fr;gap:7px;align-content:start}
+#wcDilCreate .wc-dil-shortcut{min-height:37px;text-align:left;font-size:10px;background:#30323c;color:#f3eae9;border:1px solid #ffffff24;border-radius:9px;padding:8px 9px}
+#wcDilCreate .wc-dil-shortcut:hover{background:#71534b}
+#wcDilCreate .wc-dil-wide{grid-column:1/-1;background:#674b42;font-weight:750}
+.wc-dil-tip{grid-column:1/-1;color:#bcb7bc;font-size:10px;line-height:1.5;margin:7px 0}
+#wcArtworkTransfer{width:min(450px,calc(100vw - 28px));padding:27px;background:#24262f;color:#efe9e5;border:1px solid #817066;border-radius:18px;box-shadow:0 30px 95px #000b;font-family:Inter,system-ui}
+#wcArtworkTransfer::backdrop{background:#06070cb8;backdrop-filter:blur(10px)}
+#wcArtworkTransfer h2{font-size:25px;margin:10px 0 4px;letter-spacing:-.7px}
+#wcArtworkTransfer p{font-size:12px;line-height:1.7;color:#c2bbc1;margin:0 0 25px}
+.wc-transfer-mark{font-size:10px;letter-spacing:2px;color:#edaa8d;font-weight:750}
+.wc-transfer-buttons{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.wc-transfer-buttons button{cursor:pointer;background:#343740;color:#e8e5e7;border:1px solid #ffffff26;border-radius:8px;padding:11px 14px;font-size:11px}
+.wc-transfer-buttons button.wc-positive{background:#edaa8d;color:#32241f;border-color:#edaa8d;font-weight:800}
+/* Independent animation page, with a dedicated stage, tools and inspector. */
+body.studio-v5.wc-animation-page #wcArtistControls{display:none!important}
+body.studio-v5.wc-animation-page #pageAnimation{background:#181a20;overflow:hidden}
+.wc-anim-header{height:60px;position:absolute;z-index:1200;inset:0 0 auto 0;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:0 19px;background:#23252d;border-bottom:1px solid #3e3e49}
+.wc-anim-mark{display:flex;align-items:center;gap:9px;font-size:19px;color:#edaa8d;white-space:nowrap}
+.wc-anim-mark strong{font-size:17px;color:#eee5e0;letter-spacing:-.4px}
+.wc-anim-mark span{border-left:1px solid #5b5151;padding-left:13px;margin-left:7px;font-size:11px;letter-spacing:.8px;color:#d3b2a1}
+.wc-anim-header-actions{display:flex;align-items:center;gap:7px;min-width:0}
+.wc-anim-header-actions button{background:#32343e;color:#e6dfdc;border:1px solid #4d4b54;border-radius:8px;padding:9px 13px;font-size:11px;white-space:nowrap;cursor:pointer}
+.wc-anim-header-actions .is-selected{background:#6b4d41;color:#fff;border-color:#ae7d65}
+.wc-anim-header-actions button:hover{background:#725347}
+#wcAnimTools{position:absolute;top:60px;left:0;bottom:0;width:57px;z-index:1150;background:#23252e;border-right:1px solid #414048;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 5px 6px;overflow-y:auto;scrollbar-width:thin}
+#wcAnimToolMount{display:flex;flex-direction:column;gap:5px}
+#wcAnimToolMount #studioToolButtons{display:flex;flex-direction:column;gap:7px}
+#wcAnimTools #studioToolButtons button{display:grid;place-items:center!important;min-width:39px!important;width:39px!important;height:39px!important;padding:9px!important;border:1px solid #49434a!important;border-radius:9px!important;color:#e0ced0!important;background:#34343f!important}
+#wcAnimTools #studioToolButtons button.active{background:#7d5647!important;color:white!important}
+#wcAnimTools svg{width:20px;height:20px}
+.wc-anim-brush-control{display:grid;gap:4px;text-align:center;color:#bdb1b5;font-size:8px;margin-top:10px}
+#wcAnimBrushSize{font-size:10px;text-align:center;width:44px;padding:4px 0;background:#31343e;color:white;border:1px solid #685a55;border-radius:6px}
+#wcAnimColor{background:#34343f;color:#eec3a9;border:1px solid #49434a;border-radius:9px;padding:9px 4px;font-size:9px;cursor:pointer}
+#wcAnimInspector{position:absolute;top:60px;right:0;bottom:0;width:303px;z-index:1130;background:#202229;border-left:1px solid #42414c;display:flex;flex-direction:column;overflow:hidden}
+#wcAnimInspectorCaption{font-size:12px;font-weight:750;color:#e9ceb9;padding:16px;border-bottom:1px solid #3d3c46}
+#wcAnimInspectorMount{overflow-y:auto;flex:1;scrollbar-width:thin}
+#wcAnimInspectorMount #studioLayerPane,#wcAnimInspectorMount #studioMotionPane{display:block;overflow:visible;padding:0}
+#wcAnimInspectorMount #layersPopover.docked{display:flex!important}
+body.studio-v5.wc-animation-page #pageAnimation #viewport{position:absolute!important;inset:60px 303px var(--animation-height,295px) 57px!important;width:auto!important;height:auto!important;left:57px!important;top:60px!important;right:303px!important;bottom:var(--animation-height,295px)!important;background:#161820}
+body.studio-v5.wc-animation-page #pageAnimation #animationStudio{display:block;position:absolute!important;left:57px!important;right:303px!important;bottom:0!important;width:auto!important;max-height:45dvh!important;border-radius:0!important;padding:12px 17px!important;z-index:1170!important}
+body.studio-v5.wc-animation-page #pageAnimation #animationStudio[hidden]{display:none!important}
+body.studio-v5.wc-animation-page #pageAnimation #colorPopover{z-index:2300!important;position:fixed!important;top:70px!important;left:75px!important}
+body.studio-v5.wc-animation-page #pageAnimation #colorPopover:not(.open){display:none!important}
+@media (max-width:1150px){#wcDILStart,#wcStartAnimation{padding:6px 7px;font-size:9px}.wc-anim-mark span{display:none}#wcAnimInspector{width:245px}body.studio-v5.wc-animation-page #pageAnimation #viewport{right:245px!important}body.studio-v5.wc-animation-page #pageAnimation #animationStudio{right:245px!important}}
+@media (max-width:700px){#wcDILStart{font-size:0!important;padding:8px!important}#wcDILStart::after{content:'◈ DIL';font-size:9px}#wcStartAnimation{display:none}.wc-anim-header{height:50px;padding:0 8px}.wc-anim-mark{font-size:12px}.wc-anim-mark strong{font-size:12px}.wc-anim-header-actions button{font-size:9px;padding:7px 7px}#wcAnimInspector{width:185px;top:50px}#wcAnimTools{top:50px;width:42px;padding:6px 1px}#wcAnimTools #studioToolButtons button{min-width:35px!important;width:35px!important;height:35px!important;padding:7px!important}body.studio-v5.wc-animation-page #pageAnimation #viewport{inset:50px 185px var(--animation-height,300px) 42px!important;right:185px!important;left:42px!important;top:50px!important}body.studio-v5.wc-animation-page #pageAnimation #animationStudio{left:42px!important;right:185px!important;max-height:52dvh!important}#wcDilDock{bottom:8px;gap:0;padding:4px}#wcDilDock button{padding:6px 5px;font-size:9px}.wc-dil-island{width:220px}#wcDilCreate{grid-template-columns:1fr}.wc-dil-shortcut{grid-column:1/-1}body.studio-v5.wc-animation-page #pageAnimation #animAdvanced{max-height:22vh;overflow:auto}}
+/* Condense migrated legacy buttons without losing their accessible title labels. */
+#wcDilTools #studioToolButtons button,#wcDilTools #studioMoreTools button{overflow:hidden!important;font-size:0!important;white-space:nowrap!important}
+#wcDilTools #studioToolButtons button>span,#wcDilTools #studioMoreTools button>span{display:none!important}
+#wcDilTools #studioToolButtons button::after,#wcDilTools #studioMoreTools button::after{display:none!important}
+#wcDilTools #studioToolButtons button svg,#wcDilTools #studioMoreTools button svg{flex:0 0 19px!important;min-width:19px}
+#wcAnimTools #studioToolButtons button{overflow:hidden!important;font-size:0!important}
+#wcAnimTools #studioToolButtons button>span{display:none!important}
+
+body.studio-v5.wc-dil-fullscreen #quickShapeToolbar.open{display:flex!important;z-index:2900!important;top:10px!important;left:50%!important;transform:translateX(-50%)!important;max-height:160px!important;overflow:auto!important;}
+/* 5.7: a clearer drawing timeline and a consistent ribbon identity. */
+.studio-logo {background:none!important;border:0!important;padding:0!important;box-shadow:none!important;}
+.studio-logo img {display:block;width:36px;height:36px;}
+.brand-dot {background:none!important;box-shadow:none!important;}
+.brand-dot img {display:block;width:100%;height:100%;}
+.wc-anim-mark img {flex:none;border-radius:9px;}
+body.studio-v5 #pageAnimation #animationStudio {background:linear-gradient(155deg,#242731,#1b1e27);border-top:1px solid #ffffff16;padding:12px 18px;}
+body.studio-v5 #animationStudio .anim-top {margin-bottom:9px;}
+body.studio-v5 #animationStudio .anim-heading strong {font-size:14px;font-weight:750;letter-spacing:-.2px;}
+body.studio-v5 #animationStudio button {min-height:32px;border-radius:8px;transition:background .14s ease,border-color .14s ease,transform .14s ease;}
+body.studio-v5 #animationStudio button:hover {background:#414350;border-color:#87869a;}
+body.studio-v5 #animationStudio button:active {transform:translateY(1px);}
+body.studio-v5 #animationStudio .anim-primary {background:#edb396;border-color:#edb396;color:#281f1c;font-weight:750;}
+body.studio-v5 #animationStudio #animAdd {background:#303f3c;border-color:#618d7e;color:#c4f1de;font-weight:700;}
+body.studio-v5 #animationStudio .anim-controls {max-height:none;overflow:visible;gap:7px;}
+.anim-transport,.anim-edit-actions,.anim-onion-controls {display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.anim-edit-actions {padding-left:9px;border-left:1px solid #ffffff18;}
+.anim-workflow {display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #ffffff10;}
+.anim-rate-presets {display:flex;align-items:center;gap:4px;}
+.anim-rate-presets>span {color:#a5a8b8;font-size:10px;margin-right:5px;}
+body.studio-v5 #animationStudio .anim-rate-presets button {min-width:38px;min-height:29px;padding:4px 7px;font-variant-numeric:tabular-nums;background:transparent;border-color:transparent;}
+.anim-rate-presets small {font-size:8px;display:block;opacity:.65;line-height:1;}
+body.studio-v5 #animationStudio .anim-rate-presets button.is-active {background:#c7b5ff21;color:#e3d9ff;border-color:#a58fdb77;}
+.anim-jump {display:flex;align-items:center;gap:6px;margin-left:auto;color:#b8bbca;font-size:10px;}
+body.studio-v5 #animationStudio #animJump {width:58px;min-height:29px;font-variant-numeric:tabular-nums;text-align:center;}
+#animCapacity {font-size:10px;color:#a5a8b8;font-variant-numeric:tabular-nums;}
+body.studio-v5 #animationStudio #animFrames {min-height:108px;padding:11px 2px 9px;gap:9px;scroll-behavior:smooth;scrollbar-color:#747184 #242731;}
+body.studio-v5 #animationStudio .anim-frame {position:relative;flex-basis:108px;border-radius:10px;padding:6px;background:#171b24;border-color:#ffffff16;}
+body.studio-v5 #animationStudio .anim-frame.selected {background:#3c3341;border-color:#c6aff5;box-shadow:0 0 0 1px #c6aff533;}
+body.studio-v5 #animationStudio .anim-thumb {height:58px;border-radius:6px;}
+.anim-frame-number {position:absolute;left:10px;top:10px;z-index:1;background:#141620df;border:1px solid #ffffff18;border-radius:5px;color:#f5efff;padding:2px 4px;font-size:9px;font-variant-numeric:tabular-nums;}
+body.studio-v5 #animationStudio .anim-frame>span {font-size:10px;margin:6px 2px 1px;color:#b9bbca;}
+.anim-timing {margin-top:8px;color:#acafbf;font-size:10px;}
+.anim-timing summary {cursor:pointer;padding:5px 0;}
+.anim-timing-fields {display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding:7px 0;}
+body.studio-v5 #animationStudio .anim-bottom {padding-top:8px;border-top:1px solid #ffffff10;}
+@media(max-width:1150px){body.studio-v5 #animationStudio .anim-controls {max-height:82px;overflow-y:auto;}#animCapacity {width:100%;}.anim-edit-actions {padding-left:0;border:0;}}
+@media(max-width:600px){body.studio-v5 #pageAnimation #animationStudio {padding:9px 10px;}.anim-workflow {gap:7px;}.anim-rate-presets {gap:1px;}.anim-jump {margin-left:0;}body.studio-v5 #animationStudio .anim-frame {flex-basis:94px;}body.studio-v5 #animationStudio #animFrames {min-height:97px;}body.studio-v5 #animationStudio .anim-thumb {height:48px;}body.studio-v5 #animationStudio .anim-heading>span:last-child {display:none;}.studio-logo img {width:29px;height:29px;}}
+@media(prefers-reduced-motion:reduce){body.studio-v5 #animationStudio button {transition:none!important;}body.studio-v5 #animationStudio #animFrames {scroll-behavior:auto;}}
+body.studio-v5.wc-animation-page.wc-anim-inspector-closed #wcAnimInspector {display:none;}
+body.studio-v5.wc-animation-page.wc-anim-inspector-closed #pageAnimation #viewport,body.studio-v5.wc-animation-page.wc-anim-inspector-closed #pageAnimation #animationStudio {right:0!important;}
+body.studio-v5 #animationStudio.anim-compact #animFrames,body.studio-v5 #animationStudio.anim-compact .anim-workflow,body.studio-v5 #animationStudio.anim-compact .anim-timing,body.studio-v5 #animationStudio.anim-compact #animAdvanced,body.studio-v5 #animationStudio.anim-compact .anim-bottom,body.studio-v5 #animationStudio.anim-compact .anim-onion-controls {display:none;}
+body.studio-v5 #animationStudio.anim-compact .anim-edit-actions>button:not(#animAdd) {display:none;}
+@media(max-width:900px){
+ #wcAnimInspector {display:none!important;width:min(290px,calc(100vw - 57px));z-index:1300;box-shadow:-20px 0 50px #0008;}
+ body.wc-anim-inspector-open #wcAnimInspector {display:flex!important;}
+ body.studio-v5.wc-animation-page #pageAnimation #viewport,body.studio-v5.wc-animation-page #pageAnimation #animationStudio {right:0!important;}
+ .wc-anim-header {gap:8px;padding:0 10px;}
+ .wc-anim-mark span {display:none;}
+ .wc-anim-header-actions {gap:4px;}
+ .wc-anim-header-actions button {padding:8px;font-size:10px;}
+}
+@media(max-width:700px){
+ .wc-anim-header {height:88px;align-items:center;}
+ .wc-anim-header-actions {flex:1;flex-wrap:wrap;justify-content:flex-end;}
+ .wc-anim-mark strong {display:none;}
+ .wc-anim-mark img {width:30px;height:30px;}
+ #wcAnimTools,#wcAnimInspector {top:88px;}
+ body.studio-v5.wc-animation-page #pageAnimation #viewport {top:88px!important;}
+ body.studio-v5 #animationStudio .anim-top {align-items:center;}
+ body.studio-v5 #animationStudio .anim-heading strong {font-size:12px;}
+ body.studio-v5 #animationStudio .anim-badge {display:none;}
+ body.studio-v5 #animationStudio .anim-actions {gap:4px;}
+ body.studio-v5 #animationStudio #animDraw {display:none;}
+}
+#editingToolStrip[hidden],#editingSmudgeModeLabel[hidden]{display:none!important}
+#editingToolStrip{position:fixed;z-index:1180;left:76px;top:78px;display:flex;flex-wrap:wrap;align-items:center;gap:9px;max-width:calc(100vw - 410px);padding:9px 12px;background:#222631ed;color:#e9e7f0;border:1px solid #ffffff24;border-radius:12px;box-shadow:0 8px 24px #0004;font:11px/1.3 system-ui;backdrop-filter:blur(14px)}
+#editingToolStrip strong{color:#f3c2a8}#editingToolStrip label{display:flex;align-items:center;gap:5px}#editingToolStrip select,#editingToolStrip button{color:#eee;background:#343846;border:1px solid #ffffff28;border-radius:6px;padding:5px;font:inherit;min-height:29px}#editingLayerName{color:#b8bbcb;max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wc-animation-page #editingToolStrip{top:70px}
+.wc-dil-fullscreen #editingToolStrip{display:none}
+@media(max-width:900px){#editingToolStrip{max-width:calc(100vw - 88px);left:66px;top:72px}#editingLayerName{display:none}}
+@media(max-width:700px){#editingToolStrip{left:51px;top:106px;gap:6px;max-width:calc(100vw - 64px);padding:7px;font-size:10px}.wc-animation-page #editingToolStrip{top:97px}#editingFullStrength{display:none}}
+#editingToolStrip {opacity:1!important;pointer-events:auto!important;transform:none!important;}
+
+/* 5.14.2: short viewports must keep every tool reachable. */
+#studioTools {overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;}
+#studioTools > * {flex-shrink:0;}
+#studioTools > .studio-tool-spacer {flex-shrink:1;min-height:0;}
+#studioMoreTools {position:fixed;left:calc(var(--studio-rail) + 8px);bottom:calc(var(--studio-bottom) + 8px);max-height:calc(100dvh - var(--studio-top) - var(--studio-bottom) - 16px);overscroll-behavior:contain;}
+@media(max-width:900px){body.studio-inspector-open #editingToolStrip{display:none;}}
+@media(max-width:1200px){body.wc-android.studio-inspector-open #editingToolStrip{display:none;}}
+
+/* Keep edit strength visible and SVGs in the vector paint pipeline. */
+#editingFullStrength{display:inline-flex!important;align-items:center;min-height:36px;touch-action:manipulation;}
+.canvas-board,.wc-layer-group{backface-visibility:visible;-webkit-backface-visibility:visible;will-change:auto;}
+.canvas-board .vector-layer-surface{shape-rendering:geometricPrecision;transform:none;filter:none!important;}

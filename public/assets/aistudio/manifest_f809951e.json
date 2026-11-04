@@ -1,0 +1,28 @@
+{
+  "name": "WinCreate 6.5.2",
+  "short_name": "WinCreate",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#10121c",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

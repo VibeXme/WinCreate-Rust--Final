@@ -1,0 +1,106 @@
+/* Android uses one shared safe area for headers, sheets, canvas and tool docks. */
+body.wc-android {
+  --wc-safe-top:var(--wc-manual-top,max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px),var(--wc-native-top,0px),var(--wc-legacy-top,0px)));
+  --wc-safe-bottom:var(--wc-manual-bottom,max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px),var(--wc-native-bottom,0px),var(--wc-legacy-bottom,0px)));
+  --wc-safe-left:max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px),var(--wc-native-left,0px));
+  --wc-safe-right:max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px),var(--wc-native-right,0px));
+  --safe-top:var(--wc-safe-top); --safe-bottom:var(--wc-safe-bottom); --safe-left:var(--wc-safe-left); --safe-right:var(--wc-safe-right);
+  --wc-header-height:calc(var(--studio-top) + var(--wc-safe-top));
+  overscroll-behavior:none; -webkit-tap-highlight-color:transparent;
+}
+body.wc-android .page { height:var(--wc-app-height,100dvh); max-height:var(--wc-app-height,100dvh); }
+body.wc-android #pageStudio,body.wc-android #pageAnimation { overflow:hidden; animation:none; }
+body.wc-android #viewport { touch-action:none; overscroll-behavior:contain; }
+body.wc-android #studioHeader { height:var(--wc-header-height); padding:var(--wc-safe-top) calc(12px + var(--wc-safe-right)) 0 calc(12px + var(--wc-safe-left)); }
+body.wc-android #wcDILStart,body.wc-android #wcStartAnimation { display:none; }
+body.wc-android #studioTools { top:var(--wc-header-height); left:var(--wc-safe-left); bottom:calc(var(--studio-bottom) + var(--wc-safe-bottom)); }
+body.wc-android.studio-v5 #viewport { top:var(--wc-header-height)!important; left:calc(var(--studio-rail) + var(--wc-safe-left))!important; right:calc(var(--studio-sidebar) + var(--wc-safe-right))!important; bottom:calc(var(--studio-bottom) + var(--wc-safe-bottom))!important; }
+body.wc-android #studioInspector { top:var(--wc-header-height); right:var(--wc-safe-right); bottom:calc(var(--studio-bottom) + var(--wc-safe-bottom)); width:min(360px,calc(100vw - var(--wc-safe-left) - var(--wc-safe-right))); }
+body.wc-android #studioFooter { left:var(--wc-safe-left); right:var(--wc-safe-right); bottom:var(--wc-safe-bottom); }
+body.wc-android #studioTools button,body.wc-android #studioTools .ios-icon-btn { min-width:44px; width:44px; height:44px; }
+body.wc-android .studio-inspector-tabs button,body.wc-android .studio-size-presets button { min-height:44px; }
+body.wc-android .studio-field input[type=range] { min-height:32px; touch-action:pan-y; }
+body.wc-android .qs-handle { min-width:28px; min-height:28px; }
+body.wc-android #studioMoreTools { padding:9px; max-height:calc(var(--wc-app-height,100dvh) - var(--wc-header-height) - 90px); overscroll-behavior:contain; touch-action:pan-y; }
+body.wc-android #studioMoreTools button { min-height:44px; }
+body.wc-android .wc-screen-settings { border-top:1px solid var(--studio-line); padding:10px 4px 4px; font:11px/1.5 system-ui; color:#c2bdc4; }
+body.wc-android .wc-screen-settings summary { cursor:pointer; padding:8px 0; }
+body.wc-android .wc-screen-settings label { display:flex; align-items:center; gap:8px; padding:6px 0; }
+body.wc-android .wc-screen-settings input { width:60px; min-height:38px; color:#eee; background:#191b22; border:1px solid #51515b; border-radius:6px; padding:5px; }
+body.wc-android #editingToolStrip { top:calc(var(--wc-header-height) + 8px); left:calc(var(--studio-rail) + var(--wc-safe-left) + 8px); max-width:calc(100vw - var(--studio-rail) - var(--wc-safe-left) - var(--wc-safe-right) - 16px); gap:6px; font-size:10px; backdrop-filter:none; }
+body.wc-android.studio-v5 .popover:not(.docked),body.wc-android.studio-v5 .ios-layer-menu-sheet { top:calc(var(--wc-header-height) + 8px)!important; left:calc(8px + var(--wc-safe-left))!important; right:auto!important; max-width:calc(100vw - var(--wc-safe-left) - var(--wc-safe-right) - 16px)!important; max-height:calc(var(--wc-app-height,100dvh) - var(--wc-header-height) - var(--wc-safe-bottom) - 88px)!important; }
+body.wc-android #quickShapeToolbar.open { top:calc(var(--wc-header-height) + 6px)!important; left:calc(8px + var(--wc-safe-left))!important; right:calc(8px + var(--wc-safe-right))!important; max-width:none; max-height:32dvh; overflow:auto; }
+body.wc-android #wcArtistControls { right:calc(8px + var(--wc-safe-right)); bottom:calc(var(--studio-bottom) + var(--wc-safe-bottom) + 8px); }
+body.wc-android #pageSetup { padding-top:calc(16px + var(--wc-safe-top)); padding-bottom:calc(24px + var(--wc-safe-bottom)); padding-left:calc(16px + var(--wc-safe-left)); padding-right:calc(16px + var(--wc-safe-right)); }
+body.wc-android .wc-anim-header { top:0; height:calc(60px + var(--wc-safe-top)); padding:var(--wc-safe-top) calc(10px + var(--wc-safe-right)) 0 calc(10px + var(--wc-safe-left)); }
+body.wc-android #wcAnimTools,body.wc-android #wcAnimInspector { top:calc(60px + var(--wc-safe-top)); bottom:var(--wc-safe-bottom); }
+body.wc-android.studio-v5.wc-animation-page #pageAnimation #viewport { top:calc(60px + var(--wc-safe-top))!important; bottom:calc(var(--animation-height,260px) + var(--wc-safe-bottom))!important; }
+body.wc-android.studio-v5.wc-animation-page #pageAnimation #animationStudio { bottom:var(--wc-safe-bottom)!important; }
+@media (min-width:701px) and (max-width:1200px) {
+  body.wc-android.studio-v5 { --studio-rail:56px; --studio-top:56px; --studio-bottom:30px; --studio-sidebar:0px; }
+  body.wc-android #studioInspector { display:none!important; }
+  body.wc-android.studio-inspector-open #studioInspector { display:flex!important; z-index:1500; }
+  body.wc-android .studio-inspector-tabs #studioInspectorClose { display:block; }
+}
+@media (max-width:700px) {
+  body.wc-android.studio-v5 { --studio-rail:0px; --studio-top:92px; --studio-bottom:68px; --studio-sidebar:0px; }
+  body.wc-android #studioHeader { display:grid; grid-template-columns:auto auto 1fr; grid-template-rows:44px 40px; align-content:start; gap:0 8px; padding:calc(4px + var(--wc-safe-top)) calc(8px + var(--wc-safe-right)) 4px calc(8px + var(--wc-safe-left)); }
+  body.wc-android .studio-brand { grid-column:1; grid-row:1; margin:0; min-width:32px; height:40px; }
+  body.wc-android .studio-brand>span:not(.studio-logo),body.wc-android .studio-brand small,body.wc-android .studio-document { display:none; }
+  body.wc-android #studioHistoryActions { grid-column:2; grid-row:1; gap:4px; }
+  body.wc-android #studioHistoryActions button { width:42px; min-width:42px; height:40px; }
+  body.wc-android .studio-header-actions { grid-column:3; grid-row:1; justify-self:end; margin:0; gap:3px; }
+  body.wc-android .studio-header-actions button { min-width:42px; min-height:40px; padding:9px; }
+  body.wc-android .studio-header-actions button span { display:none; }
+  body.wc-android #studioModes { grid-column:1/-1; grid-row:2; order:0; width:100%; min-width:0; margin:0; height:40px; padding:3px; justify-content:stretch; align-self:center; }
+  body.wc-android #studioModes button { flex:1; max-width:none; min-width:0; min-height:32px; padding:5px 8px; gap:6px; font-size:11px; justify-content:center; }
+  body.wc-android #studioModes svg { width:16px; height:16px; }
+  body.wc-android #studioFooter,body.wc-android #wcArtistControls { display:none; }
+  body.wc-android #studioTools { top:auto; left:0; right:0; bottom:0; width:100%; height:calc(68px + var(--wc-safe-bottom)); flex-direction:row; gap:5px; padding:5px calc(7px + var(--wc-safe-right)) calc(5px + var(--wc-safe-bottom)) calc(7px + var(--wc-safe-left)); border-top:1px solid var(--studio-line); border-right:0; }
+  body.wc-android #studioToolButtons { flex:1; min-width:0; flex-direction:row; gap:4px; overflow-x:auto; scrollbar-width:none; touch-action:pan-x; overscroll-behavior:contain; }
+  body.wc-android #studioToolButtons::-webkit-scrollbar { display:none; }
+  body.wc-android #studioTools #studioToolButtons button { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px; flex:none; width:48px; min-width:48px; height:54px; padding:5px; }
+  body.wc-android #studioToolButtons button>span { display:block; font-size:8px; line-height:1.2; }
+  body.wc-android #studioTools .studio-tool-separator,body.wc-android .studio-tool-spacer { display:none; }
+  body.wc-android #studioFileMenu>summary { width:44px; height:50px; }
+  body.wc-android #studioMoreTools { position:fixed; left:auto; right:calc(8px + var(--wc-safe-right)); bottom:calc(76px + var(--wc-safe-bottom)); width:min(280px,calc(100vw - var(--wc-safe-left) - var(--wc-safe-right) - 16px)); }
+  body.wc-android #studioInspector { top:var(--wc-header-height); bottom:calc(68px + var(--wc-safe-bottom)); border-radius:16px 0 0 16px; }
+  body.wc-android.studio-v5 #viewport { left:var(--wc-safe-left)!important; right:var(--wc-safe-right)!important; bottom:calc(68px + var(--wc-safe-bottom))!important; }
+  body.wc-android #editingToolStrip { left:calc(8px + var(--wc-safe-left)); max-width:calc(100vw - var(--wc-safe-left) - var(--wc-safe-right) - 16px); padding:6px 8px; }
+  body.wc-android.studio-v5 #brushPopover,body.wc-android.studio-v5 #settingsPopover { width:calc(100vw - var(--wc-safe-left) - var(--wc-safe-right) - 16px)!important; }
+  body.wc-android .blib-cats { width:95px; padding:6px; }
+  body.wc-android .blib-list { padding:8px; }
+  body.wc-android .wc-anim-header { height:calc(92px + var(--wc-safe-top)); align-items:flex-start; padding-top:calc(4px + var(--wc-safe-top)); gap:5px; }
+  body.wc-android .wc-anim-mark { display:none; }
+  body.wc-android .wc-anim-header-actions { display:flex; flex-wrap:wrap; justify-content:flex-start; align-content:center; width:100%; height:84px; gap:4px; }
+  body.wc-android .wc-anim-header-actions button { font-size:10px; min-height:36px; padding:6px 8px; }
+  body.wc-android .wc-anim-header-actions #studioHistoryActions { margin-left:auto; }
+  body.wc-android #wcAnimTools { top:auto; left:0; right:0; bottom:0; width:100%; height:calc(68px + var(--wc-safe-bottom)); flex-direction:row; padding:5px calc(6px + var(--wc-safe-right)) calc(5px + var(--wc-safe-bottom)) calc(6px + var(--wc-safe-left)); overflow:visible; gap:6px; border-top:1px solid #414048; }
+  body.wc-android #wcAnimToolMount { flex:1; min-width:0; overflow-x:auto; touch-action:pan-x; }
+  body.wc-android #wcAnimToolMount #studioToolButtons { flex-direction:row; gap:4px; }
+  body.wc-android #wcAnimTools #studioToolButtons button { flex:none; width:44px!important; min-width:44px!important; height:44px!important; }
+  body.wc-android #wcAnimTools #studioToolButtons button>span { display:none; }
+  body.wc-android .wc-anim-brush-control { flex:none; margin:0; }
+  body.wc-android #wcAnimBrushSize { min-height:32px; }
+  body.wc-android #wcAnimColor { font-size:0; width:42px; height:44px; padding:8px; }
+  body.wc-android #wcAnimColor::after { content:'◉'; font-size:24px; }
+  body.wc-android #wcAnimInspector { top:var(--wc-header-height); right:var(--wc-safe-right); bottom:calc(68px + var(--wc-safe-bottom)); width:min(340px,calc(100vw - var(--wc-safe-left) - var(--wc-safe-right))); z-index:1500; }
+  body.wc-android.studio-v5.wc-animation-page #pageAnimation #viewport { top:var(--wc-header-height)!important; left:var(--wc-safe-left)!important; right:var(--wc-safe-right)!important; bottom:calc(68px + var(--wc-safe-bottom) + var(--animation-height,200px))!important; }
+  body.wc-android.studio-v5.wc-animation-page #pageAnimation #animationStudio { left:var(--wc-safe-left)!important; right:var(--wc-safe-right)!important; bottom:calc(68px + var(--wc-safe-bottom))!important; max-height:40dvh!important; padding:8px!important; overflow-y:auto; }
+}
+@media (orientation:landscape) and (max-height:600px) {
+  body.wc-android.studio-v5 { --studio-top:48px; --studio-rail:52px; --studio-bottom:0px; --studio-sidebar:0px; }
+  body.wc-android #studioHeader { display:flex; flex-wrap:nowrap; gap:8px; height:var(--wc-header-height); padding:var(--wc-safe-top) calc(8px + var(--wc-safe-right)) 0 calc(8px + var(--wc-safe-left)); }
+  body.wc-android .studio-brand>span:not(.studio-logo),body.wc-android .studio-brand small,body.wc-android .studio-document { display:none; }
+  body.wc-android #studioModes { width:auto; flex:1; max-width:330px; margin:auto; height:38px; }
+  body.wc-android #studioModes button { flex:1; max-width:none; padding:6px 8px; font-size:10px; }
+  body.wc-android #studioTools { top:var(--wc-header-height); bottom:var(--wc-safe-bottom); left:var(--wc-safe-left); right:auto; width:52px; height:auto; flex-direction:column; padding:4px; border-top:0; }
+  body.wc-android #studioToolButtons { flex-direction:column; overflow-y:auto; overflow-x:hidden; touch-action:pan-y; }
+  body.wc-android #studioTools #studioToolButtons button { flex:none; width:44px; min-width:44px; height:44px; padding:8px; }
+  body.wc-android #studioToolButtons button>span,body.wc-android #studioFooter,body.wc-android #wcArtistControls { display:none; }
+  body.wc-android #studioMoreTools { left:calc(60px + var(--wc-safe-left)); right:auto; bottom:calc(8px + var(--wc-safe-bottom)); }
+  body.wc-android #studioInspector { top:var(--wc-header-height); bottom:var(--wc-safe-bottom); }
+  body.wc-android.studio-v5 #viewport { left:calc(52px + var(--wc-safe-left))!important; bottom:var(--wc-safe-bottom)!important; }
+  body.wc-android #editingToolStrip { left:calc(60px + var(--wc-safe-left)); max-width:calc(100vw - var(--wc-safe-left) - var(--wc-safe-right) - 70px); }
+}
+body.wc-android.wc-hide-hud #viewport,body.wc-android.wc-dil-fullscreen #viewport { top:0!important; bottom:0!important; left:0!important; right:0!important; }

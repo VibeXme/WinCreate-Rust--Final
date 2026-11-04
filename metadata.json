@@ -1,0 +1,6 @@
+{
+  "name": "WinCreate 6.5.2 — Draw in Motion",
+  "description": "WinCreate Studio, a precision drawing workspace with ColorDrop, vector ink, wet smudging, layers and tracing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
