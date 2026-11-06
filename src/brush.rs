@@ -1382,6 +1382,51 @@ mod tests {
     }
 
     #[test]
+    fn curved_taper_stays_within_tangent_continuation() {
+        let size = 16.0;
+        let radius = 120.0;
+        let center = (128.0, 128.0);
+        let arc_length = radius * std::f32::consts::FRAC_PI_2;
+        let samples = (arc_length / 6.0).ceil() as usize;
+        let mut p = params(Tip::Round);
+        p.size = size;
+        p.stream = 35.0;
+        p.taper_end = 20.0;
+        let mut layer = Tiled::new(272, 272);
+        let mut stroke = Stroke::new(p, layer.clone(), 19);
+        let mut dirty = IRect::EMPTY;
+        for i in 0..=samples {
+            let angle = std::f32::consts::FRAC_PI_2 * i as f32 / samples as f32;
+            dirty = dirty.union(&stroke.add_point(InputPoint {
+                x: center.0 + radius * angle.cos(),
+                y: center.1 + radius * angle.sin(),
+                pressure: 1.0,
+            }));
+        }
+        dirty = dirty.union(&stroke.rerender(true));
+        stroke.apply(&mut layer, dirty);
+
+        let endpoint = center.1 + radius;
+        let final_ten_percent_x = center.0 + arc_length * 0.1;
+        let mut max_deviation = 0.0_f32;
+        let mut tail_coverage = false;
+        for y in 0..272 {
+            for x in 0..272 {
+                if layer.get(x, y)[3] > 0 && x as f32 <= final_ten_percent_x {
+                    tail_coverage = true;
+                    max_deviation = max_deviation.max((y as f32 - endpoint).abs());
+                }
+            }
+        }
+
+        assert!(tail_coverage);
+        assert!(
+            max_deviation <= size * 0.5 + 2.0,
+            "tail coverage deviated {max_deviation:.1}px from its tangent"
+        );
+    }
+
+    #[test]
     fn eraser_removes_paint() {
         let mut layer = Tiled::filled(100, 100, [0, 0, 0, 255]);
         let mut p = params(Tip::Round);

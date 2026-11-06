@@ -118,7 +118,13 @@ impl WinCreateApp {
         ui.label(format!("Selected · {}", brush::preset(&self.brush_id).name));
         let mut size_slider = brush::size_to_slider(self.size);
         if ui
-            .add(egui::Slider::new(&mut size_slider, 0.0..=1.0).text("Size"))
+            .add(
+                egui::Slider::new(&mut size_slider, 0.0..=1.0)
+                    .text("Size")
+                    .custom_formatter(|value, _| {
+                        format!("{:.1} px", brush::slider_to_size(value as f32))
+                    }),
+            )
             .changed()
         {
             self.size = brush::slider_to_size(size_slider);
