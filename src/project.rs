@@ -665,7 +665,16 @@ pub fn load_file(path: &std::path::Path) -> Result<Document> {
     }
     let text = std::fs::read_to_string(path)?;
     let mut doc = deserialize(&text)?;
-    if doc.title == "Untitled Artwork" {
+    let title_exists = serde_json::from_str::<Value>(&text)
+        .ok()
+        .and_then(|value| {
+            value
+                .get("title")
+                .and_then(Value::as_str)
+                .map(|title| !title.trim().is_empty())
+        })
+        .unwrap_or(false);
+    if !title_exists {
         if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
             doc.title = stem.to_string();
         }
@@ -881,6 +890,17 @@ enum Tok {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn loading_preserves_untitled_document_name() {
+        let path =
+            std::env::temp_dir().join(format!("wincreate-title-test-{}.winc", std::process::id()));
+        let mut doc = Document::new("Untitled Artwork", 64, 64, [255, 255, 255]);
+        save_file(&mut doc, &path).unwrap();
+        let loaded = load_file(&path).unwrap();
+        std::fs::remove_file(path).unwrap();
+        assert_eq!(loaded.title, "Untitled Artwork");
+    }
 
     #[test]
     fn roundtrip_preserves_layers_and_pixels() {
