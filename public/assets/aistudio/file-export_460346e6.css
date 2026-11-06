@@ -1,9 +1,0 @@
-.wc-save-dialog{box-sizing:border-box;width:min(420px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto;border:1px solid #4a4b60;border-radius:20px;background:#202132;color:#f5f5fa;padding:24px;font:14px/1.55 system-ui,sans-serif;box-shadow:0 24px 70px #0008}
-.wc-save-dialog::backdrop{background:#080912b8}
-.wc-save-dialog h2{font-size:19px;line-height:1.35;overflow-wrap:anywhere;margin:0 0 12px}
-.wc-save-dialog p{color:#c7cad9;margin:0 0 18px}
-.wc-save-dialog progress{width:100%;accent-color:#a5b4fc;margin-bottom:18px}
-.wc-save-dialog button{display:block;width:100%;min-height:44px;padding:10px 16px;margin-top:10px;border:1px solid #5b5e7a;border-radius:12px;background:#373a57;color:white;font:600 14px system-ui;cursor:pointer}
-.wc-save-dialog button:focus-visible{outline:3px solid #a5b4fc;outline-offset:2px}
-.wc-save-dialog button:disabled{opacity:.55}
-.wc-save-dialog button[hidden]{display:none}
