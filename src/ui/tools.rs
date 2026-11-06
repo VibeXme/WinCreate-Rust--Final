@@ -15,7 +15,7 @@ impl WinCreateApp {
         let mut transform_changed = false;
         egui::SidePanel::left("tools")
             .resizable(false)
-            .default_width(140.0)
+            .default_width(230.0)
             .show(ctx, |ui| {
                 ui.heading("Tools");
                 for tool in [
@@ -28,8 +28,15 @@ impl WinCreateApp {
                     Tool::Move,
                     Tool::Hand,
                 ] {
+                    let width = ui.available_width();
                     if ui
-                        .selectable_label(self.tool == tool, tool.label())
+                        .add_sized(
+                            [width, 32.0],
+                            egui::SelectableLabel::new(
+                                self.tool == tool,
+                                format!("{}    {}", tool.label(), tool.shortcut()),
+                            ),
+                        )
                         .clicked()
                     {
                         self.tool = tool;
@@ -90,7 +97,7 @@ impl WinCreateApp {
                     ui.checkbox(&mut self.sample_all_layers, "Sample all layers");
                     if self.fill_receiver.is_some() {
                         ui.spinner();
-                        ui.label("Filling…");
+                        ui.label("Filling...");
                     }
                 }
                 if self.canvas.zoom <= 0.0 {
@@ -697,7 +704,7 @@ impl WinCreateApp {
         });
         self.fill_original = Some(original);
         self.fill_receiver = Some(receiver);
-        self.notify("Filling…");
+        self.notify("Filling...");
     }
 
     pub(super) fn poll_fill(&mut self, ctx: &egui::Context) {

@@ -39,10 +39,23 @@ impl Tool {
             Self::Eraser => "Eraser",
             Self::Smudge => "Smudge",
             Self::Fill => "Fill",
-            Self::Eyedropper => "Picker",
+            Self::Eyedropper => "Eyedropper",
             Self::Shape => "Shape",
             Self::Move => "Move",
             Self::Hand => "Hand",
+        }
+    }
+
+    fn shortcut(self) -> &'static str {
+        match self {
+            Self::Brush => "B",
+            Self::Eraser => "E",
+            Self::Smudge => "S",
+            Self::Fill => "G",
+            Self::Eyedropper => "I",
+            Self::Shape => "U",
+            Self::Move => "V",
+            Self::Hand => "H",
         }
     }
 }
@@ -134,6 +147,7 @@ pub struct WinCreateApp {
     transform_initial_offset: Vec2,
     fill_receiver: Option<std::sync::mpsc::Receiver<Option<tools::FillResult>>>,
     fill_original: Option<Document>,
+    ui_scale: f32,
     pending_exit: Option<ExitAction>,
     resize_dialog_open: bool,
     resize_width: usize,
@@ -155,6 +169,23 @@ impl WinCreateApp {
         visuals.widgets.hovered.bg_fill = Color32::from_rgb(58, 59, 72);
         visuals.selection.bg_fill = Color32::from_rgb(99, 102, 241);
         cc.egui_ctx.set_visuals(visuals);
+        let mut style = (*cc.egui_ctx.style()).clone();
+        style
+            .text_styles
+            .insert(egui::TextStyle::Body, egui::FontId::proportional(14.5));
+        style
+            .text_styles
+            .insert(egui::TextStyle::Button, egui::FontId::proportional(14.5));
+        style
+            .text_styles
+            .insert(egui::TextStyle::Heading, egui::FontId::proportional(20.0));
+        style
+            .text_styles
+            .insert(egui::TextStyle::Small, egui::FontId::proportional(12.0));
+        style.spacing.item_spacing = Vec2::new(10.0, 8.0);
+        style.spacing.button_padding = Vec2::new(12.0, 8.0);
+        style.spacing.interact_size = Vec2::new(44.0, 32.0);
+        cc.egui_ctx.set_style(style);
 
         let mut app = Self {
             screen: Screen::Home,
@@ -224,6 +255,7 @@ impl WinCreateApp {
             transform_initial_offset: Vec2::ZERO,
             fill_receiver: None,
             fill_original: None,
+            ui_scale: 1.0,
             pending_exit: None,
             resize_dialog_open: false,
             resize_width: 1280,
@@ -317,6 +349,7 @@ impl WinCreateApp {
                 app.pressure_opacity =
                     number("pressure_opacity", app.pressure_opacity).clamp(0.0, 1.0);
                 app.pressure_gamma = number("pressure_gamma", app.pressure_gamma).clamp(0.25, 3.0);
+                app.ui_scale = number("ui_scale", app.ui_scale).clamp(0.75, 2.0);
                 app.quick_shape = boolean("quick_shape", app.quick_shape);
                 app.simulate_pressure_from_speed =
                     boolean("simulate_pressure", app.simulate_pressure_from_speed);
@@ -342,6 +375,7 @@ impl WinCreateApp {
                 }
             }
         }
+        cc.egui_ctx.set_zoom_factor(app.ui_scale);
         app
     }
 
@@ -475,6 +509,7 @@ impl eframe::App for WinCreateApp {
             "pressure_size": self.pressure_size,
             "pressure_opacity": self.pressure_opacity,
             "pressure_gamma": self.pressure_gamma,
+            "ui_scale": self.ui_scale,
             "quick_shape": self.quick_shape,
             "simulate_pressure": self.simulate_pressure_from_speed,
             "sample_all_layers": self.sample_all_layers,

@@ -51,24 +51,24 @@ impl WinCreateApp {
                             self.canvas.invalidate();
                             self.dirty = true;
                         }
-                        if ui.button("←").clicked() {
+                        if ui.button("Prev").clicked() {
                             self.history.push(&before, "Move frame");
                             doc.move_frame(-1);
                             self.canvas.invalidate();
                             self.dirty = true;
                         }
-                        if ui.button("→").clicked() {
+                        if ui.button("Next").clicked() {
                             self.history.push(&before, "Move frame");
                             doc.move_frame(1);
                             self.canvas.invalidate();
                             self.dirty = true;
                         }
                         ui.menu_button("Export animation", |ui| {
-                            export_gif |= ui.button("GIF…").clicked();
-                            export_sequence |= ui.button("PNG sequence…").clicked();
+                            export_gif |= ui.button("GIF...").clicked();
+                            export_sequence |= ui.button("PNG sequence...").clicked();
                             let available = crate::export::ffmpeg_available();
                             let mp4 = ui
-                                .add_enabled(available, egui::Button::new("MP4…"))
+                                .add_enabled(available, egui::Button::new("MP4..."))
                                 .on_hover_text(if available {
                                     "Export an MP4 animation"
                                 } else {
@@ -76,7 +76,7 @@ impl WinCreateApp {
                                 });
                             export_mp4 |= mp4.clicked();
                             let webm = ui
-                                .add_enabled(available, egui::Button::new("WebM…"))
+                                .add_enabled(available, egui::Button::new("WebM..."))
                                 .on_hover_text(if available {
                                     "Export a WebM animation"
                                 } else {
@@ -114,7 +114,7 @@ impl WinCreateApp {
                         ui.checkbox(&mut looping, "Loop");
                         ui.checkbox(&mut onion, "Onion skin");
                         if onion {
-                            ui.add(egui::Slider::new(&mut alpha, 0.05..=0.8).text("Onion α"));
+                            ui.add(egui::Slider::new(&mut alpha, 0.05..=0.8).text("Onion alpha"));
                             ui.add(
                                 egui::DragValue::new(&mut before_count)
                                     .range(0..=8)

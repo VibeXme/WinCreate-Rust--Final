@@ -251,7 +251,7 @@ impl WinCreateApp {
     pub(super) fn show_top_bar(&mut self, ctx: &egui::Context) {
         egui::TopBottomPanel::top("topbar").show(ctx, |ui| {
             ui.horizontal(|ui| {
-                if ui.button("‹ Gallery").clicked() {
+                if ui.button("Back").clicked() {
                     self.request_exit(ctx, ExitAction::Gallery);
                 }
                 ui.separator();
@@ -268,19 +268,19 @@ impl WinCreateApp {
                 ));
                 ui.separator();
                 if ui
-                    .add_enabled(self.history.can_undo(), egui::Button::new("↶ Undo"))
+                    .add_enabled(self.history.can_undo(), egui::Button::new("Undo"))
                     .clicked()
                 {
                     self.undo();
                 }
                 if ui
-                    .add_enabled(self.history.can_redo(), egui::Button::new("↷ Redo"))
+                    .add_enabled(self.history.can_redo(), egui::Button::new("Redo"))
                     .clicked()
                 {
                     self.redo();
                 }
                 ui.menu_button("File", |ui| {
-                    if ui.button("Open…  Ctrl+O").clicked() {
+                    if ui.button("Open...  Ctrl+O").clicked() {
                         ui.close_menu();
                         self.open_dialog();
                     }
@@ -288,23 +288,23 @@ impl WinCreateApp {
                         ui.close_menu();
                         self.save_gallery();
                     }
-                    if ui.button("Save as .winc…  Ctrl+Shift+S").clicked() {
+                    if ui.button("Save as .winc...  Ctrl+Shift+S").clicked() {
                         ui.close_menu();
                         self.save_as();
                     }
-                    if ui.button("Export…  Ctrl+E").clicked() {
+                    if ui.button("Export...  Ctrl+E").clicked() {
                         ui.close_menu();
                         self.export_dialog();
                     }
-                    if ui.button("Export with background…").clicked() {
+                    if ui.button("Export with background...").clicked() {
                         ui.close_menu();
                         self.export_dialog_with_background(true);
                     }
-                    if ui.button("Export transparent…").clicked() {
+                    if ui.button("Export transparent...").clicked() {
                         ui.close_menu();
                         self.export_dialog_with_background(false);
                     }
-                    if ui.button("Import image as layer…").clicked() {
+                    if ui.button("Import image as layer...").clicked() {
                         ui.close_menu();
                         self.import_layer();
                     }
@@ -323,6 +323,14 @@ impl WinCreateApp {
                         self.mutate_layer("Duplicate", |doc| doc.duplicate_layer(doc.active));
                     }
                 });
+                ui.menu_button("View", |ui| {
+                    if ui
+                        .add(egui::Slider::new(&mut self.ui_scale, 0.75..=2.0).text("UI scale"))
+                        .changed()
+                    {
+                        ctx.set_zoom_factor(self.ui_scale);
+                    }
+                });
                 ui.menu_button("Canvas", |ui| {
                     if ui.button("Enable animation").clicked() {
                         ui.close_menu();
@@ -337,7 +345,7 @@ impl WinCreateApp {
                     if ui.button("100%  Ctrl+1").clicked() {
                         self.canvas.zoom = 1.0;
                     }
-                    if ui.button("Resize canvas…").clicked() {
+                    if ui.button("Resize canvas...").clicked() {
                         ui.close_menu();
                         if let Some(doc) = self.doc.as_ref() {
                             self.resize_width = doc.w;
@@ -347,10 +355,16 @@ impl WinCreateApp {
                     }
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.label(if self.dirty {
-                        "● Unsaved"
-                    } else {
-                        "✓ Saved"
+                    ui.horizontal(|ui| {
+                        let status = if self.dirty {
+                            Color32::from_rgb(244, 93, 93)
+                        } else {
+                            Color32::from_rgb(75, 195, 135)
+                        };
+                        let (dot, _) =
+                            ui.allocate_exact_size(Vec2::splat(10.0), egui::Sense::hover());
+                        ui.painter().circle_filled(dot.center(), 4.0, status);
+                        ui.label(if self.dirty { "Unsaved" } else { "Saved" });
                     });
                 });
             });

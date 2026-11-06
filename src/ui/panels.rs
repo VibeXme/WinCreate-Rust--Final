@@ -1,10 +1,17 @@
 use super::*;
 
+fn color_swatch(ui: &mut egui::Ui, color: Color32) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(Vec2::new(42.0, 24.0), egui::Sense::click());
+    ui.painter().rect_filled(rect, 4.0, color);
+    response
+}
+
 impl WinCreateApp {
     pub(super) fn show_right_panel(&mut self, ctx: &egui::Context) {
         egui::SidePanel::right("inspector")
             .resizable(true)
-            .default_width(275.0)
+            .min_width(340.0)
+            .default_width(360.0)
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     for tab in ["Brushes", "Colour", "Layers", "Adjust"] {
@@ -30,7 +37,7 @@ impl WinCreateApp {
         let mut extract = false;
         let mut remove = false;
         ui.collapsing("Trace reference", |ui| {
-            load = ui.button("Load reference image…").clicked();
+            load = ui.button("Load reference image...").clicked();
             if let Some(reference) = self.canvas.trace.as_mut() {
                 ui.checkbox(&mut reference.locked, "Lock reference");
                 ui.add_enabled_ui(!reference.locked, |ui| {
@@ -123,8 +130,10 @@ impl WinCreateApp {
         ui.add(egui::Slider::new(&mut self.taper_start, 0.0..=100.0).text("Taper start"));
         ui.add(egui::Slider::new(&mut self.taper_end, 0.0..=100.0).text("Taper end"));
         ui.add(egui::Slider::new(&mut self.jitter, 0.0..=1.0).text("Jitter"));
-        ui.add(egui::Slider::new(&mut self.pressure_size, 0.0..=1.0).text("Pressure → size"));
-        ui.add(egui::Slider::new(&mut self.pressure_opacity, 0.0..=1.0).text("Pressure → opacity"));
+        ui.add(egui::Slider::new(&mut self.pressure_size, 0.0..=1.0).text("Pressure to size"));
+        ui.add(
+            egui::Slider::new(&mut self.pressure_opacity, 0.0..=1.0).text("Pressure to opacity"),
+        );
         ui.add(egui::Slider::new(&mut self.pressure_gamma, 0.25..=3.0).text("Pressure gamma"));
         egui::ComboBox::from_label("Smudge preset")
             .selected_text(self.smudge_preset.clone())
@@ -272,20 +281,30 @@ impl WinCreateApp {
         }
         ui.horizontal(|ui| {
             ui.label("Primary");
-            ui.colored_label(
+            let primary = color_swatch(
+                ui,
                 Color32::from_rgb(self.color[0], self.color[1], self.color[2]),
-                "██████",
             );
-            if ui.button("Swap").clicked() {
+            if primary.clicked() {
+                std::mem::swap(&mut self.color, &mut self.secondary);
+                self.hex = color::to_hex(self.color);
+                self.remember_current_color();
+            }
+            if ui.button("X").clicked() {
+                std::mem::swap(&mut self.color, &mut self.secondary);
+                self.hex = color::to_hex(self.color);
+                self.remember_current_color();
+            }
+            let secondary = color_swatch(
+                ui,
+                Color32::from_rgb(self.secondary[0], self.secondary[1], self.secondary[2]),
+            );
+            if secondary.clicked() {
                 std::mem::swap(&mut self.color, &mut self.secondary);
                 self.hex = color::to_hex(self.color);
                 self.remember_current_color();
             }
             ui.label("Secondary");
-            ui.colored_label(
-                Color32::from_rgb(self.secondary[0], self.secondary[1], self.secondary[2]),
-                "██████",
-            );
         });
         ui.label("Built-in palettes");
         for (name, palette) in [
@@ -450,13 +469,11 @@ impl WinCreateApp {
                                 self.rename_layer = Some(*index);
                             }
                         }
-                        let mut is_visible = *visible;
-                        if ui.checkbox(&mut is_visible, "◉").changed() {
-                            visibility.push((*index, is_visible));
+                        if ui.button(if *visible { "Hide" } else { "Show" }).clicked() {
+                            visibility.push((*index, !visible));
                         }
-                        let mut is_locked = *locked;
-                        if ui.checkbox(&mut is_locked, "🔒").changed() {
-                            locks.push((*index, is_locked));
+                        if ui.button(if *locked { "Unlock" } else { "Lock" }).clicked() {
+                            locks.push((*index, !locked));
                         }
                     });
                     ui.horizontal(|ui| {
@@ -550,8 +567,8 @@ impl WinCreateApp {
             delete = ui.button("Delete").clicked();
         });
         ui.horizontal(|ui| {
-            move_up = ui.button("↑").clicked();
-            move_down = ui.button("↓").clicked();
+            move_up = ui.button("Up").clicked();
+            move_down = ui.button("Down").clicked();
             clear = ui.button("Clear").clicked();
             flip_horizontal = ui.button("Flip H").clicked();
             flip_vertical = ui.button("Flip V").clicked();

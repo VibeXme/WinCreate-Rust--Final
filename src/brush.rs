@@ -1070,23 +1070,27 @@ impl Stroke {
     /// Re-render the whole stroke (used for end taper and QuickShape replacement).
     pub fn rerender(&mut self, finished: bool) -> IRect {
         let old = self.mask.bounds;
+        let pts = std::mem::take(&mut self.points);
+        self.total_len = None;
         self.mask.clear();
         self.smoothed.clear();
         self.carry = 0.0;
         self.dab_index = 0;
-        if finished {
-            // Total length of the smoothed path is approximated by the raw path.
-            let mut len = 0.0;
-            for w in self.points.windows(2) {
-                len += (w[1].x - w[0].x).hypot(w[1].y - w[0].y);
-            }
-            self.total_len = Some(len * 0.98);
-        }
         self.travelled = 0.0;
-        let pts = std::mem::take(&mut self.points);
         let mut dirty = old;
         for pt in &pts {
             dirty = dirty.union(&self.advance(*pt));
+        }
+        if finished && self.params.taper_end > 0.0 && self.travelled > 0.0 {
+            self.total_len = Some(self.travelled);
+            self.mask.clear();
+            self.smoothed.clear();
+            self.carry = 0.0;
+            self.dab_index = 0;
+            self.travelled = 0.0;
+            for pt in &pts {
+                dirty = dirty.union(&self.advance(*pt));
+            }
         }
         self.points = pts;
         dirty
@@ -1334,6 +1338,47 @@ mod tests {
             assert_eq!(layer.get(x, 50), [255, 0, 0, 255], "gap at {x}");
         }
         assert_eq!(layer.get(100, 70)[3], 0);
+    }
+
+    #[test]
+    fn end_taper_uses_smoothed_path_length_without_hooking() {
+        let mut p = params(Tip::Round);
+        p.size = 10.0;
+        p.stream = 35.0;
+        p.taper_end = 35.0;
+        let mut layer = Tiled::new(256, 96);
+        let mut stroke = Stroke::new(p, layer.clone(), 7);
+        let points: Vec<_> = (0..=8)
+            .map(|i| InputPoint {
+                x: 32.0 + i as f32 * 24.0,
+                y: 48.0,
+                pressure: 1.0,
+            })
+            .collect();
+        let mut dirty = IRect::EMPTY;
+        for point in &points {
+            dirty = dirty.union(&stroke.add_point(*point));
+        }
+        dirty = dirty.union(&stroke.rerender(true));
+
+        assert!((stroke.total_len.expect("tapered path length") - stroke.travelled).abs() < 0.01);
+        assert!(stroke
+            .smoothed
+            .windows(2)
+            .all(|pair| { pair[1].x >= pair[0].x && (pair[1].y - pair[0].y).abs() < 0.001 }));
+
+        stroke.apply(&mut layer, dirty);
+        let mut painted = false;
+        for y in 0..96 {
+            for x in 0..256 {
+                if layer.get(x, y)[3] > 0 {
+                    painted = true;
+                    assert!((41..=55).contains(&y), "coverage left stroke band at y={y}");
+                    assert!((25..=231).contains(&x), "coverage hooked beyond x={x}");
+                }
+            }
+        }
+        assert!(painted);
     }
 
     #[test]

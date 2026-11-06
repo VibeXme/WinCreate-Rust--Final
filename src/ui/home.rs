@@ -3,164 +3,254 @@ use super::*;
 impl WinCreateApp {
     pub(super) fn show_home(&mut self, ctx: &egui::Context) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.add_space(12.0);
+            let available = ui.available_size();
+            let content_width = available.x.min(1200.0);
+            let side_margin = ((available.x - content_width) * 0.5).max(0.0);
+            let vertical_margin = ((available.y - 760.0) * 0.5).max(8.0);
+            ui.add_space(vertical_margin);
             ui.horizontal(|ui| {
-                ui.heading("WinCreate Studio");
-                ui.label(
-                    egui::RichText::new("NATIVE PAINT WORKSPACE")
-                        .small()
-                        .color(Color32::from_rgb(140, 150, 180)),
-                );
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.button("Open file…").clicked() {
-                        self.open_dialog();
-                    }
-                });
-            });
-            ui.add_space(12.0);
-            ui.columns(2, |columns| {
-                let ui = &mut columns[0];
-                ui.group(|ui| {
-                    ui.heading("Start a canvas");
-                    ui.horizontal(|ui| {
-                        ui.label("Title");
-                        ui.text_edit_singleline(&mut self.preset_title);
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label("Width");
-                        ui.add(egui::DragValue::new(&mut self.width).range(64..=MAX_EDGE));
-                        ui.label("Height");
-                        ui.add(egui::DragValue::new(&mut self.height).range(64..=MAX_EDGE));
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label("Backdrop");
-                        let mut background = Color32::from_rgb(
-                            self.new_background[0],
-                            self.new_background[1],
-                            self.new_background[2],
-                        );
-                        if ui.color_edit_button_srgba(&mut background).changed() {
-                            self.new_background = [background.r(), background.g(), background.b()];
-                        }
-                        ui.checkbox(&mut self.transparent, "Transparent");
-                    });
-                    ui.checkbox(&mut self.animation, "Animation");
-                    ui.add_space(8.0);
-                    ui.label("Canvas presets");
-                    for (name, w, h, background) in [
-                        ("Full Screen White", 1920, 1080, [255, 255, 255]),
-                        ("Obsidian Dark", 1920, 1080, [12, 12, 18]),
-                        ("OLED Pitch Black", 1920, 1080, [0, 0, 0]),
-                        ("Warm Sketchbook", 1920, 1080, [253, 246, 227]),
-                        ("Square 1:1", 1080, 1080, [255, 255, 255]),
-                        ("Cinema 16:9", 1920, 1080, [255, 255, 255]),
-                        ("Story / Reel 9:16", 1080, 1920, [255, 255, 255]),
-                        ("A4 Print Portrait", 2480, 3508, [255, 255, 255]),
-                    ] {
-                        if ui.button(format!("{name}  ·  {w} × {h}")).clicked() {
-                            self.width = w;
-                            self.height = h;
-                            self.new_background = background;
-                        }
-                    }
-                    ui.add_space(8.0);
-                    if ui
-                        .button(egui::RichText::new("Create canvas").strong())
-                        .clicked()
-                    {
-                        self.create_document(
-                            self.width,
-                            self.height,
-                            self.preset_title.clone(),
-                            self.transparent,
-                            self.animation,
-                        );
-                    }
-                });
-                let ui = &mut columns[1];
-                ui.group(|ui| {
-                    ui.heading("Gallery");
-                    if let Some(entry) = self.recovery.clone() {
+                ui.add_space(side_margin);
+                ui.allocate_ui_with_layout(
+                    Vec2::new(content_width, available.y - vertical_margin),
+                    egui::Layout::top_down(egui::Align::Min),
+                    |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(format!("Recovery available: {}", entry.title));
-                            if ui.button("Restore").clicked() {
-                                if let Err(error) = self.load_path(&entry.project_path) {
-                                    self.notify(format!("Restore failed: {error:#}"));
-                                } else {
-                                    self.recovery = None;
-                                }
-                            }
-                            if ui.button("Discard").clicked() {
-                                storage::clear_recovery();
-                                self.recovery = None;
-                            }
+                            ui.heading("WinCreate Studio");
+                            ui.label(
+                                egui::RichText::new("NATIVE PAINT WORKSPACE")
+                                    .small()
+                                    .color(Color32::from_rgb(140, 150, 180)),
+                            );
+                            ui.with_layout(
+                                egui::Layout::right_to_left(egui::Align::Center),
+                                |ui| {
+                                    if ui.button("Open file...").clicked() {
+                                        self.open_dialog();
+                                    }
+                                },
+                            );
                         });
-                    }
-                    self.gallery = storage::list_gallery();
-                    if self.gallery.is_empty() {
-                        ui.label("Your saved projects will appear here.");
-                    }
-                    egui::ScrollArea::vertical()
-                        .max_height(460.0)
-                        .show(ui, |ui| {
-                            ui.horizontal_wrapped(|ui| {
-                                for entry in self.gallery.clone() {
-                                    ui.group(|ui| {
-                                        ui.set_width(176.0);
-                                        if let Some(texture) = self.gallery_thumbnail(ctx, &entry) {
-                                            ui.image((texture.id(), Vec2::new(160.0, 105.0)));
+                        ui.add_space(12.0);
+                        ui.columns(2, |columns| {
+                            columns[0].group(|ui| {
+                                ui.heading("Start a canvas");
+                                ui.horizontal(|ui| {
+                                    ui.label("Title");
+                                    ui.text_edit_singleline(&mut self.preset_title);
+                                });
+                                ui.horizontal(|ui| {
+                                    ui.label("Width");
+                                    ui.add(
+                                        egui::DragValue::new(&mut self.width).range(64..=MAX_EDGE),
+                                    );
+                                    ui.label("Height");
+                                    ui.add(
+                                        egui::DragValue::new(&mut self.height).range(64..=MAX_EDGE),
+                                    );
+                                });
+                                ui.horizontal(|ui| {
+                                    ui.label("Backdrop");
+                                    let mut background = Color32::from_rgb(
+                                        self.new_background[0],
+                                        self.new_background[1],
+                                        self.new_background[2],
+                                    );
+                                    if ui.color_edit_button_srgba(&mut background).changed() {
+                                        self.new_background =
+                                            [background.r(), background.g(), background.b()];
+                                    }
+                                    ui.checkbox(&mut self.transparent, "Transparent");
+                                });
+                                ui.checkbox(&mut self.animation, "Animation");
+                                ui.add_space(6.0);
+                                ui.label("Canvas presets");
+                                ui.horizontal_wrapped(|ui| {
+                                    for (name, w, h, background) in [
+                                        ("Full Screen White", 1920, 1080, [255, 255, 255]),
+                                        ("Obsidian Dark", 1920, 1080, [12, 12, 18]),
+                                        ("OLED Pitch Black", 1920, 1080, [0, 0, 0]),
+                                        ("Warm Sketchbook", 1920, 1080, [253, 246, 227]),
+                                        ("Square 1:1", 1080, 1080, [255, 255, 255]),
+                                        ("Cinema 16:9", 1920, 1080, [255, 255, 255]),
+                                        ("Story / Reel 9:16", 1080, 1920, [255, 255, 255]),
+                                        ("A4 Print Portrait", 2480, 3508, [255, 255, 255]),
+                                    ] {
+                                        let (card, response) = ui.allocate_exact_size(
+                                            Vec2::new(278.0, 76.0),
+                                            egui::Sense::click(),
+                                        );
+                                        let painter = ui.painter();
+                                        painter.rect_filled(
+                                            card,
+                                            8.0,
+                                            if response.hovered() {
+                                                Color32::from_rgb(53, 55, 68)
+                                            } else {
+                                                Color32::from_rgb(38, 40, 50)
+                                            },
+                                        );
+                                        let aspect = w as f32 / h as f32;
+                                        let preview_size = if aspect >= 70.0 / 42.0 {
+                                            Vec2::new(70.0, 70.0 / aspect)
                                         } else {
-                                            ui.allocate_ui(Vec2::new(160.0, 105.0), |ui| {
-                                                ui.centered_and_justified(|ui| {
-                                                    ui.label("Preview unavailable");
-                                                });
-                                            });
+                                            Vec2::new(42.0 * aspect, 42.0)
+                                        };
+                                        let preview = egui::Rect::from_center_size(
+                                            egui::pos2(card.left() + 46.0, card.center().y),
+                                            preview_size,
+                                        );
+                                        painter.rect_filled(
+                                            preview,
+                                            3.0,
+                                            Color32::from_rgb(
+                                                background[0],
+                                                background[1],
+                                                background[2],
+                                            ),
+                                        );
+                                        painter.text(
+                                            egui::pos2(card.left() + 88.0, card.top() + 16.0),
+                                            egui::Align2::LEFT_TOP,
+                                            name,
+                                            egui::FontId::proportional(14.0),
+                                            Color32::WHITE,
+                                        );
+                                        painter.text(
+                                            egui::pos2(card.left() + 88.0, card.top() + 43.0),
+                                            egui::Align2::LEFT_TOP,
+                                            format!("{w} x {h}"),
+                                            egui::FontId::proportional(12.0),
+                                            Color32::from_gray(180),
+                                        );
+                                        if response.clicked() {
+                                            self.width = w;
+                                            self.height = h;
+                                            self.new_background = background;
                                         }
-                                        ui.label(egui::RichText::new(&entry.title).strong());
-                                        ui.label(format!(
-                                            "{} × {}{}",
-                                            entry.width,
-                                            entry.height,
-                                            if entry.animation { " · Animation" } else { "" }
-                                        ));
-                                        ui.horizontal(|ui| {
-                                            if ui.button("Open").clicked() {
-                                                if let Err(error) =
-                                                    self.load_path(&entry.project_path)
-                                                {
-                                                    self.notify(format!("Open failed: {error:#}"));
-                                                } else {
-                                                    self.gallery_id = Some(entry.id.clone());
-                                                }
+                                    }
+                                });
+                                ui.add_space(6.0);
+                                if ui
+                                    .button(egui::RichText::new("Create canvas").strong())
+                                    .clicked()
+                                {
+                                    self.create_document(
+                                        self.width,
+                                        self.height,
+                                        self.preset_title.clone(),
+                                        self.transparent,
+                                        self.animation,
+                                    );
+                                }
+                            });
+                            columns[1].group(|ui| {
+                                ui.heading("Gallery");
+                                if let Some(entry) = self.recovery.clone() {
+                                    ui.horizontal(|ui| {
+                                        ui.label(format!("Recovery available: {}", entry.title));
+                                        if ui.button("Restore").clicked() {
+                                            if let Err(error) = self.load_path(&entry.project_path)
+                                            {
+                                                self.notify(format!("Restore failed: {error:#}"));
+                                            } else {
+                                                self.recovery = None;
                                             }
-                                            if ui.button("Delete").clicked() {
-                                                self.delete_confirmation = Some(entry.clone());
+                                        }
+                                        if ui.button("Discard").clicked() {
+                                            storage::clear_recovery();
+                                            self.recovery = None;
+                                        }
+                                    });
+                                }
+                                self.gallery = storage::list_gallery();
+                                if self.gallery.is_empty() {
+                                    ui.label("Your saved projects will appear here.");
+                                }
+                                egui::ScrollArea::vertical()
+                                    .max_height(520.0)
+                                    .show(ui, |ui| {
+                                        ui.horizontal_wrapped(|ui| {
+                                            for entry in self.gallery.clone() {
+                                                ui.group(|ui| {
+                                                    ui.set_width(280.0);
+                                                    if let Some(texture) =
+                                                        self.gallery_thumbnail(ctx, &entry)
+                                                    {
+                                                        ui.image((
+                                                            texture.id(),
+                                                            Vec2::new(256.0, 160.0),
+                                                        ));
+                                                    } else {
+                                                        ui.allocate_ui(
+                                                            Vec2::new(256.0, 160.0),
+                                                            |ui| {
+                                                                ui.centered_and_justified(|ui| {
+                                                                    ui.label("Preview unavailable");
+                                                                });
+                                                            },
+                                                        );
+                                                    }
+                                                    ui.label(
+                                                        egui::RichText::new(&entry.title).strong(),
+                                                    );
+                                                    ui.label(format!(
+                                                        "{} x {}{}",
+                                                        entry.width,
+                                                        entry.height,
+                                                        if entry.animation {
+                                                            " | Animation"
+                                                        } else {
+                                                            ""
+                                                        }
+                                                    ));
+                                                    ui.horizontal(|ui| {
+                                                        if ui.button("Open").clicked() {
+                                                            if let Err(error) =
+                                                                self.load_path(&entry.project_path)
+                                                            {
+                                                                self.notify(format!(
+                                                                    "Open failed: {error:#}"
+                                                                ));
+                                                            } else {
+                                                                self.gallery_id =
+                                                                    Some(entry.id.clone());
+                                                            }
+                                                        }
+                                                        if ui.button("Delete").clicked() {
+                                                            self.delete_confirmation =
+                                                                Some(entry.clone());
+                                                        }
+                                                    });
+                                                });
                                             }
                                         });
                                     });
+                                ui.add_space(8.0);
+                                if ui.button("Import image as canvas...").clicked() {
+                                    if let Some(path) = rfd::FileDialog::new()
+                                        .add_filter(
+                                            "Image",
+                                            &["png", "jpg", "jpeg", "webp", "bmp", "gif"],
+                                        )
+                                        .pick_file()
+                                    {
+                                        if let Err(error) = self.load_path(&path) {
+                                            self.notify(format!("Import failed: {error:#}"));
+                                        }
+                                    }
                                 }
                             });
                         });
-                    ui.add_space(8.0);
-                    if ui.button("Import image as canvas…").clicked() {
-                        if let Some(path) = rfd::FileDialog::new()
-                            .add_filter("Image", &["png", "jpg", "jpeg", "webp", "bmp", "gif"])
-                            .pick_file()
-                        {
-                            if let Err(error) = self.load_path(&path) {
-                                self.notify(format!("Import failed: {error:#}"));
-                            }
-                        }
-                    }
-                });
+                        ui.add_space(14.0);
+                        ui.label(
+                            egui::RichText::new(
+                                "Brush | layers | animation | .winc / ORA / PSD / image export",
+                            )
+                            .color(Color32::GRAY),
+                        );
+                    },
+                );
             });
-            ui.add_space(20.0);
-            ui.label(
-                egui::RichText::new(
-                    "Brush • layers • animation • .winc / ORA / PSD / image export",
-                )
-                .color(Color32::GRAY),
-            );
         });
         if let Some(entry) = self.delete_confirmation.clone() {
             let mut dismiss = false;
@@ -169,7 +259,7 @@ impl WinCreateApp {
                 .collapsible(false)
                 .resizable(false)
                 .show(ctx, |ui| {
-                    ui.label(format!("Delete “{}” from the gallery?", entry.title));
+                    ui.label(format!("Delete \"{}\" from the gallery?", entry.title));
                     ui.horizontal(|ui| {
                         if ui.button("Cancel").clicked() {
                             dismiss = true;
