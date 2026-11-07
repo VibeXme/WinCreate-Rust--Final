@@ -2,8 +2,10 @@ mod canvas;
 mod files;
 mod home;
 mod panels;
+mod theme;
 mod timeline;
 mod tools;
+mod workspace;
 
 use crate::adjust::{self, Filter};
 use crate::brush::{self, InputPoint, Stroke, StrokeMode, StrokeParams, Symmetry};
@@ -148,6 +150,9 @@ pub struct WinCreateApp {
     fill_receiver: Option<std::sync::mpsc::Receiver<Option<tools::FillResult>>>,
     fill_original: Option<Document>,
     ui_scale: f32,
+    workspace: workspace::WorkspacePrefs,
+    appearance_open: bool,
+    focus_mode: bool,
     pending_exit: Option<ExitAction>,
     resize_dialog_open: bool,
     resize_width: usize,
@@ -161,31 +166,7 @@ pub struct WinCreateApp {
 
 impl WinCreateApp {
     pub fn new(cc: &eframe::CreationContext<'_>, initial_path: Option<PathBuf>) -> Self {
-        let mut visuals = egui::Visuals::dark();
-        visuals.panel_fill = Color32::from_rgb(24, 25, 32);
-        visuals.window_fill = Color32::from_rgb(29, 30, 38);
-        visuals.widgets.noninteractive.bg_fill = Color32::from_rgb(35, 36, 45);
-        visuals.widgets.inactive.bg_fill = Color32::from_rgb(42, 43, 53);
-        visuals.widgets.hovered.bg_fill = Color32::from_rgb(58, 59, 72);
-        visuals.selection.bg_fill = Color32::from_rgb(99, 102, 241);
-        cc.egui_ctx.set_visuals(visuals);
-        let mut style = (*cc.egui_ctx.style()).clone();
-        style
-            .text_styles
-            .insert(egui::TextStyle::Body, egui::FontId::proportional(14.5));
-        style
-            .text_styles
-            .insert(egui::TextStyle::Button, egui::FontId::proportional(14.5));
-        style
-            .text_styles
-            .insert(egui::TextStyle::Heading, egui::FontId::proportional(20.0));
-        style
-            .text_styles
-            .insert(egui::TextStyle::Small, egui::FontId::proportional(12.0));
-        style.spacing.item_spacing = Vec2::new(10.0, 8.0);
-        style.spacing.button_padding = Vec2::new(12.0, 8.0);
-        style.spacing.interact_size = Vec2::new(44.0, 32.0);
-        cc.egui_ctx.set_style(style);
+        theme::apply(&cc.egui_ctx);
 
         let mut app = Self {
             screen: Screen::Home,
@@ -256,6 +237,9 @@ impl WinCreateApp {
             fill_receiver: None,
             fill_original: None,
             ui_scale: 1.0,
+            workspace: workspace::WorkspacePrefs::default(),
+            appearance_open: false,
+            focus_mode: false,
             pending_exit: None,
             resize_dialog_open: false,
             resize_width: 1280,
@@ -350,6 +334,11 @@ impl WinCreateApp {
                     number("pressure_opacity", app.pressure_opacity).clamp(0.0, 1.0);
                 app.pressure_gamma = number("pressure_gamma", app.pressure_gamma).clamp(0.25, 3.0);
                 app.ui_scale = number("ui_scale", app.ui_scale).clamp(0.75, 2.0);
+                if let Some(saved) = prefs.get("workspace") {
+                    if let Ok(workspace) = serde_json::from_value(saved.clone()) {
+                        app.workspace = workspace;
+                    }
+                }
                 app.quick_shape = boolean("quick_shape", app.quick_shape);
                 app.simulate_pressure_from_speed =
                     boolean("simulate_pressure", app.simulate_pressure_from_speed);
@@ -376,6 +365,7 @@ impl WinCreateApp {
             }
         }
         cc.egui_ctx.set_zoom_factor(app.ui_scale);
+        app.workspace.apply(&cc.egui_ctx);
         app
     }
 
@@ -385,11 +375,12 @@ impl WinCreateApp {
     }
 
     fn handle_shortcuts(&mut self, ctx: &egui::Context) {
-        if ctx.wants_keyboard_input() {
+        if ctx.wants_keyboard_input() || self.appearance_open || self.pending_exit.is_some() {
             return;
         }
         let modifiers = ctx.input(|i| i.modifiers);
         let pressed = |key| ctx.input(|i| i.key_pressed(key));
+        let plain = |key| !modifiers.command && !modifiers.alt && pressed(key);
         if modifiers.command && pressed(egui::Key::Z) {
             if modifiers.shift {
                 self.redo();
@@ -410,7 +401,7 @@ impl WinCreateApp {
             self.canvas.zoom = 0.0;
         } else if modifiers.command && pressed(egui::Key::Num1) {
             self.canvas.zoom = 1.0;
-        } else if pressed(egui::Key::Delete) {
+        } else if plain(egui::Key::Delete) && self.screen == Screen::Studio {
             self.mutate_layer("Clear layer", |doc| {
                 let (width, height) = (doc.w, doc.h);
                 if let Some(layer) = doc.active_layer_mut() {
@@ -428,25 +419,25 @@ impl WinCreateApp {
             self.open_dialog();
         } else if modifiers.command && pressed(egui::Key::E) {
             self.export_dialog();
-        } else if pressed(egui::Key::B) {
+        } else if plain(egui::Key::B) {
             self.tool = Tool::Brush;
-        } else if pressed(egui::Key::E) {
+        } else if plain(egui::Key::E) {
             self.tool = Tool::Eraser;
-        } else if pressed(egui::Key::S) {
+        } else if plain(egui::Key::S) {
             self.tool = Tool::Smudge;
-        } else if pressed(egui::Key::G) {
+        } else if plain(egui::Key::G) {
             self.tool = Tool::Fill;
-        } else if pressed(egui::Key::I) {
+        } else if plain(egui::Key::I) {
             self.tool = Tool::Eyedropper;
-        } else if pressed(egui::Key::U) {
+        } else if plain(egui::Key::U) {
             self.tool = Tool::Shape;
-        } else if pressed(egui::Key::V) {
+        } else if plain(egui::Key::V) {
             self.tool = Tool::Move;
-        } else if pressed(egui::Key::H) {
+        } else if plain(egui::Key::H) {
             self.tool = Tool::Hand;
-        } else if pressed(egui::Key::OpenBracket) {
+        } else if plain(egui::Key::OpenBracket) {
             self.size = (self.size / 1.12).max(brush::MIN_SIZE);
-        } else if pressed(egui::Key::CloseBracket) {
+        } else if plain(egui::Key::CloseBracket) {
             self.size = (self.size * 1.12).min(brush::MAX_SIZE);
         }
     }
@@ -463,28 +454,26 @@ impl eframe::App for WinCreateApp {
             self.handle_shortcuts(ctx);
         }
         self.autosave_if_needed();
+        self.workspace_bar(ctx);
         match self.screen {
             Screen::Home => self.show_home(ctx),
             Screen::Studio => {
                 self.show_top_bar(ctx);
-                self.show_tools(ctx);
-                self.show_right_panel(ctx);
-                self.show_timeline(ctx);
-                self.show_canvas(ctx);
-                if Instant::now() < self.toast_until {
-                    egui::Area::new(egui::Id::new("toast"))
-                        .anchor(egui::Align2::CENTER_BOTTOM, Vec2::new(0.0, -18.0))
-                        .show(ctx, |ui| {
-                            ui.label(
-                                egui::RichText::new(&self.toast)
-                                    .background_color(Color32::from_gray(35))
-                                    .color(Color32::WHITE),
-                            );
-                        });
+                if !self.focus_mode && self.workspace.show_tools {
+                    self.show_tools(ctx);
                 }
+                if !self.focus_mode && self.workspace.show_inspector {
+                    self.show_right_panel(ctx);
+                }
+                if !self.focus_mode && self.workspace.show_timeline {
+                    self.show_timeline(ctx);
+                }
+                self.show_canvas(ctx);
             }
         }
+        self.workspace_toast(ctx);
         self.show_unsaved_dialog(ctx);
+        self.appearance_window(ctx);
         if self.dirty {
             ctx.request_repaint_after(Duration::from_secs(1));
         }
@@ -510,6 +499,7 @@ impl eframe::App for WinCreateApp {
             "pressure_opacity": self.pressure_opacity,
             "pressure_gamma": self.pressure_gamma,
             "ui_scale": self.ui_scale,
+            "workspace": self.workspace,
             "quick_shape": self.quick_shape,
             "simulate_pressure": self.simulate_pressure_from_speed,
             "sample_all_layers": self.sample_all_layers,

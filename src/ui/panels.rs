@@ -10,10 +10,11 @@ impl WinCreateApp {
     pub(super) fn show_right_panel(&mut self, ctx: &egui::Context) {
         egui::SidePanel::right("inspector")
             .resizable(true)
-            .min_width(340.0)
-            .default_width(360.0)
+            .width_range(280.0..=480.0)
+            .default_width(310.0)
             .show(ctx, |ui| {
-                ui.horizontal(|ui| {
+                egui::ScrollArea::vertical().id_salt("inspector-scroll").auto_shrink([false, false]).show(ui, |ui| {
+                ui.horizontal_wrapped(|ui| {
                     for tab in ["Brushes", "Colour", "Layers", "Adjust"] {
                         if ui.selectable_label(self.panel == tab, tab).clicked() {
                             self.panel = tab.to_string();
@@ -29,6 +30,7 @@ impl WinCreateApp {
                 }
                 ui.separator();
                 self.trace_panel(ui);
+                });
             });
     }
 

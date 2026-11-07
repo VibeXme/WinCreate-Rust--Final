@@ -14,10 +14,14 @@ impl WinCreateApp {
         let mut cancel_transform = false;
         let mut transform_changed = false;
         egui::SidePanel::left("tools")
-            .resizable(false)
-            .default_width(230.0)
+            .resizable(true)
+            .default_width(190.0)
+            .width_range(168.0..=280.0)
             .show(ctx, |ui| {
-                ui.heading("Tools");
+                egui::ScrollArea::vertical().id_salt("tool-sidebar-scroll").auto_shrink([false, false]).show(ui, |ui| {
+                ui.label(egui::RichText::new("TOOLKIT").small().strong().color(theme::MUTED));
+                ui.label(egui::RichText::new(self.tool.label()).size(22.0).strong());
+                ui.add_space(6.0);
                 for tool in [
                     Tool::Brush,
                     Tool::Eraser,
@@ -31,12 +35,13 @@ impl WinCreateApp {
                     let width = ui.available_width();
                     if ui
                         .add_sized(
-                            [width, 32.0],
-                            egui::SelectableLabel::new(
-                                self.tool == tool,
-                                format!("{}    {}", tool.label(), tool.shortcut()),
-                            ),
+                            [width, if self.workspace.compact { 30.0 } else { 36.0 }],
+                            egui::Button::new(
+                                egui::RichText::new(format!("{}    [{}]", tool.label(), tool.shortcut()))
+                                    .color(if self.tool == tool { self.workspace.text_accent() } else { theme::TEXT }),
+                            ).selected(self.tool == tool),
                         )
+                        .on_hover_text(format!("{} tool · shortcut {}", tool.label(), tool.shortcut()))
                         .clicked()
                     {
                         self.tool = tool;
@@ -182,8 +187,12 @@ impl WinCreateApp {
                     if let Some(parsed) = color::parse_hex(&self.hex) {
                         self.color = parsed;
                         self.remember_current_color();
+                    } else {
+                        self.notify("Invalid colour: use a six-digit hex value, for example #63DEC6.");
                     }
+                    self.hex = color::to_hex(self.color);
                 }
+                });
             });
         if transform_changed {
             self.update_transform_preview();

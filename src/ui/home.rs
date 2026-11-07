@@ -3,23 +3,35 @@ use super::*;
 impl WinCreateApp {
     pub(super) fn show_home(&mut self, ctx: &egui::Context) {
         egui::CentralPanel::default().show(ctx, |ui| {
+            if self.workspace.gradients && !self.workspace.high_contrast {
+                let rect = ui.max_rect();
+                let [r, g, b] = self.workspace.accent_rgb;
+                workspace::gradient(ui.painter(), egui::Rect::from_min_size(
+                    rect.min, Vec2::new(rect.width(), rect.height().min(340.0))),
+                    Color32::from_rgb(16 + r / 12, 20 + g / 12, 27 + b / 12),
+                    theme::BACKGROUND);
+            }
+            // Scroll contents have an unbounded height. Use the finite viewport instead.
+            let viewport_height = ui.available_height();
+            egui::ScrollArea::vertical().id_salt("home-page").show(ui, |ui| {
             let available = ui.available_size();
             let content_width = available.x.min(1200.0);
             let side_margin = ((available.x - content_width) * 0.5).max(0.0);
-            let vertical_margin = ((available.y - 760.0) * 0.5).max(8.0);
+            let vertical_margin = ((viewport_height - 760.0) * 0.5).clamp(8.0, 64.0);
             ui.add_space(vertical_margin);
             ui.horizontal(|ui| {
                 ui.add_space(side_margin);
                 ui.allocate_ui_with_layout(
-                    Vec2::new(content_width, available.y - vertical_margin),
+                    Vec2::new(content_width, (viewport_height - vertical_margin).max(0.0)),
                     egui::Layout::top_down(egui::Align::Min),
                     |ui| {
                         ui.horizontal(|ui| {
-                            ui.heading("WinCreate Studio");
+                            ui.label(egui::RichText::new("W / STUDIO")
+                                .strong().color(self.workspace.text_accent()).size(15.0));
                             ui.label(
                                 egui::RichText::new("NATIVE PAINT WORKSPACE")
                                     .small()
-                                    .color(Color32::from_rgb(140, 150, 180)),
+                                    .color(theme::MUTED),
                             );
                             ui.with_layout(
                                 egui::Layout::right_to_left(egui::Align::Center),
@@ -30,10 +42,23 @@ impl WinCreateApp {
                                 },
                             );
                         });
-                        ui.add_space(12.0);
-                        ui.columns(2, |columns| {
-                            columns[0].group(|ui| {
-                                ui.heading("Start a canvas");
+                        ui.add_space(24.0);
+                        ui.label(egui::RichText::new("Make room for your next idea.")
+                            .size(32.0).strong().color(theme::TEXT));
+                        ui.label(egui::RichText::new(
+                            "A blank canvas, a familiar project, or something entirely new.")
+                            .color(theme::MUTED));
+                        ui.add_space(22.0);
+                        let stacked = content_width < 840.0;
+                        let gallery_column = if stacked { 0 } else { 1 };
+                        ui.columns(if stacked { 1 } else { 2 }, |columns| {
+                            egui::Frame::group(columns[0].style())
+                                .fill(theme::SURFACE)
+                                .inner_margin(egui::Margin::same(16))
+                                .show(&mut columns[0], |ui| {
+                                ui.heading("New canvas");
+                                ui.label(egui::RichText::new("Set up your next artwork.").small().color(theme::MUTED));
+                                ui.add_space(8.0);
                                 ui.horizontal(|ui| {
                                     ui.label("Title");
                                     ui.text_edit_singleline(&mut self.preset_title);
@@ -84,9 +109,9 @@ impl WinCreateApp {
                                             card,
                                             8.0,
                                             if response.hovered() {
-                                                Color32::from_rgb(53, 55, 68)
+                                                Color32::from_rgb(43, 59, 70)
                                             } else {
-                                                Color32::from_rgb(38, 40, 50)
+                                                theme::RAISED
                                             },
                                         );
                                         let aspect = w as f32 / h as f32;
@@ -131,7 +156,13 @@ impl WinCreateApp {
                                 });
                                 ui.add_space(6.0);
                                 if ui
-                                    .button(egui::RichText::new("Create canvas").strong())
+                                    .add_sized(
+                                        [ui.available_width(), 44.0],
+                                        egui::Button::new(
+                                            egui::RichText::new("Create canvas").strong()
+                                                .color(self.workspace.accent_ink()))
+                                            .fill(self.workspace.accent()),
+                                    )
                                     .clicked()
                                 {
                                     self.create_document(
@@ -143,8 +174,14 @@ impl WinCreateApp {
                                     );
                                 }
                             });
-                            columns[1].group(|ui| {
-                                ui.heading("Gallery");
+                            columns[gallery_column].add_space(if stacked { 16.0 } else { 0.0 });
+                            egui::Frame::group(columns[gallery_column].style())
+                                .fill(theme::SURFACE)
+                                .inner_margin(egui::Margin::same(16))
+                                .show(&mut columns[gallery_column], |ui| {
+                                ui.heading("Your workspace");
+                                ui.label(egui::RichText::new("Pick up where you left off.").small().color(theme::MUTED));
+                                ui.add_space(8.0);
                                 if let Some(entry) = self.recovery.clone() {
                                     ui.horizontal(|ui| {
                                         ui.label(format!("Recovery available: {}", entry.title));
@@ -246,10 +283,11 @@ impl WinCreateApp {
                             egui::RichText::new(
                                 "Brush | layers | animation | .winc / ORA / PSD / image export",
                             )
-                            .color(Color32::GRAY),
+                            .small().color(theme::MUTED),
                         );
                     },
                 );
+            });
             });
         });
         if let Some(entry) = self.delete_confirmation.clone() {
